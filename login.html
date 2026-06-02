@@ -749,7 +749,7 @@ async function handleLogin() {
     }
 
     showAlert('login-success', 'Authentication successful — redirecting...');
-    setTimeout(() => { window.location.href = '/account'; }, 1000);
+    setTimeout(() => { window.location.href = '/index'; }, 1000);
 
   } catch(e) {
     showAlert('login-error', 'Could not reach authentication server');
