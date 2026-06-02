@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHX // Mercenary Dossier — Project Phoenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #05060A;
+  --bg2:       #080A10;
+  --bg3:       #0C0E16;
+  --panel:     #0A0C13;
+  --orange:    #C96A00;
+  --orange2:   #E07800;
+  --orange-dim:#5A3000;
+  --red:       #8B1A00;
+  --red2:      #C0392B;
+  --teal:      #1A4A5A;
+  --teal2:     #0D2A36;
+  --green:     #3A9A60;
+  --line:      rgba(201,106,0,0.18);
+  --line2:     rgba(201,106,0,0.08);
+  --text:      #B8C4CC;
+  --text2:     #6A7A84;
+  --text3:     #2E3A42;
+  --white:     #D8E4EA;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ── NAV ──────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 500; height: 42px;
+  background: rgba(5,6,10,0.96);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: stretch;
+}
+.nav-corp {
+  display: flex; align-items: center;
+  padding: 0 1.5rem; border-right: 1px solid var(--line);
+  gap: 10px; flex-shrink: 0; text-decoration: none;
+}
+.nav-corp-icon { width: 18px; height: 18px; border: 1px solid var(--orange); display: flex; align-items: center; justify-content: center; }
+.nav-corp-icon svg { width: 10px; height: 10px; fill: var(--orange); }
+.nav-corp-name { font-size: 11px; letter-spacing: 0.2em; color: var(--orange); text-transform: uppercase; }
+.nav-corp-sub  { font-size: 9px;  letter-spacing: 0.15em; color: var(--text2); text-transform: uppercase; }
+.nav-breadcrumb {
+  display: flex; align-items: center; padding: 0 1.25rem;
+  font-size: 10px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; gap: 0.75rem;
+}
+.nav-breadcrumb span { color: var(--orange); }
+.nav-right {
+  display: flex; align-items: center; padding: 0 1.5rem;
+  gap: 1.5rem; margin-left: auto; border-left: 1px solid var(--line);
+}
+.nav-user {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--text2); text-transform: uppercase;
+}
+.nav-user-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 4px var(--green); }
+.nav-signout {
+  font-size: 9px; letter-spacing: 0.2em; color: var(--text3);
+  text-transform: uppercase; text-decoration: none; cursor: pointer;
+  transition: color 0.15s; background: none; border: none; font-family: inherit;
+}
+.nav-signout:hover { color: var(--red2); }
+
+/* ── PAGE LAYOUT ──────────────────────────────────── */
+.page-wrap { padding-top: 42px; display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+/* ── SIDEBAR ──────────────────────────────────────── */
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--bg2);
+  display: flex; flex-direction: column;
+  padding: 2rem 0;
+  position: sticky; top: 42px; height: calc(100vh - 42px);
+  overflow-y: auto;
+}
+
+.sidebar-section { margin-bottom: 0.5rem; }
+.sidebar-label {
+  font-size: 9px; letter-spacing: 0.25em; color: var(--text3);
+  text-transform: uppercase; padding: 0.5rem 1.5rem; margin-bottom: 2px;
+}
+.sidebar-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.6rem 1.5rem;
+  font-size: 10px; letter-spacing: 0.2em;
+  color: var(--text2); text-transform: uppercase; text-decoration: none;
+  cursor: pointer; border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.sidebar-link:hover { color: var(--orange); background: rgba(201,106,0,0.04); }
+.sidebar-link.active { color: var(--orange); border-left-color: var(--orange); background: rgba(201,106,0,0.06); }
+.sidebar-link .link-icon { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.6; }
+.sidebar-link.active .link-icon { opacity: 1; }
+.sidebar-link .soon-tag {
+  margin-left: auto; font-size: 8px; letter-spacing: 0.15em;
+  color: var(--text3); border: 1px solid var(--text3); padding: 1px 4px;
+}
+
+.sidebar-footer {
+  margin-top: auto; padding: 1rem 1.5rem;
+  border-top: 1px solid var(--line2);
+  font-size: 9px; letter-spacing: 0.1em;
+  color: var(--text3); text-transform: uppercase; line-height: 2;
+}
+
+/* ── MAIN CONTENT ─────────────────────────────────── */
+.main { padding: 2.5rem 2.5rem 4rem; max-width: 900px; }
+
+/* Tab sections */
+.tab-section { display: none; }
+.tab-section.active { display: block; }
+
+/* ── PAGE HEADER ──────────────────────────────────── */
+.page-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+.page-header-label { font-size: 9px; letter-spacing: 0.3em; color: var(--text2); text-transform: uppercase; margin-bottom: 0.4rem; }
+.page-header-title {
+  font-family: 'Rajdhani', sans-serif; font-weight: 700;
+  font-size: 28px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white);
+}
+.page-header-meta { font-size: 9px; letter-spacing: 0.15em; color: var(--text3); text-transform: uppercase; text-align: right; line-height: 2; }
+
+/* ── DATA BLOCKS ──────────────────────────────────── */
+.data-row {
+  display: grid; gap: 1px;
+  background: var(--line2);
+  margin-bottom: 1px;
+}
+.data-row-2 { grid-template-columns: 1fr 1fr; }
+.data-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.data-row-4 { grid-template-columns: repeat(4, 1fr); }
+
+.data-block {
+  background: var(--bg); padding: 1.25rem 1rem;
+  border-left: 2px solid var(--line);
+  transition: border-left-color 0.15s;
+}
+.data-block:hover { border-left-color: var(--orange); }
+.data-label { font-size: 9px; letter-spacing: 0.25em; color: var(--text2); text-transform: uppercase; margin-bottom: 0.4rem; }
+.data-value { font-size: 20px; letter-spacing: 0.05em; color: var(--orange); }
+.data-value.sm { font-size: 14px; }
+.data-sub { font-size: 9px; letter-spacing: 0.15em; color: var(--text3); text-transform: uppercase; margin-top: 0.15rem; }
+.data-bar-wrap { margin-top: 0.5rem; height: 2px; background: var(--line2); }
+.data-bar-fill { height: 100%; background: var(--orange); }
+
+/* ── SECTION BLOCKS ───────────────────────────────── */
+.section-block {
+  margin-bottom: 2rem;
+}
+.section-block-header {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line2);
+}
+.section-block-title {
+  font-family: 'Rajdhani', sans-serif; font-weight: 600;
+  font-size: 16px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--white);
+}
+.section-block-title span {
+  font-family: 'Share Tech Mono', monospace; font-size: 9px;
+  letter-spacing: 0.3em; color: var(--orange); font-weight: 400;
+  display: block; margin-bottom: 2px;
+}
+
+/* ── FORM ELEMENTS ────────────────────────────────── */
+.field-group { margin-bottom: 1.25rem; }
+.field-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text2); margin-bottom: 0.5rem;
+}
+.field-input {
+  width: 100%; background: var(--bg);
+  border: 1px solid var(--line); border-left: 2px solid var(--orange-dim);
+  color: var(--white); font-family: 'Share Tech Mono', monospace;
+  font-size: 13px; padding: 10px 12px; outline: none;
+  transition: border-color 0.15s, background 0.15s; appearance: none;
+}
+.field-input:focus { border-color: var(--orange); border-left-color: var(--orange); background: var(--bg2); }
+.field-input::placeholder { color: var(--text3); }
+.field-input:read-only { color: var(--text2); cursor: default; border-left-color: var(--text3); }
+.field-input.error { border-color: var(--red2); border-left-color: var(--red2); }
+.field-error { font-size: 9px; letter-spacing: 0.15em; color: var(--red2); text-transform: uppercase; margin-top: 0.4rem; display: none; }
+.field-error.visible { display: block; }
+
+.btn-submit {
+  background: var(--orange); color: #000; border: none;
+  padding: 11px 24px; font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-submit:hover { background: var(--orange2); }
+.btn-submit:disabled { background: var(--orange-dim); cursor: not-allowed; }
+.btn-ghost {
+  background: rgba(201,106,0,0.06); color: var(--text2);
+  border: 1px solid var(--line); padding: 11px 24px;
+  font-family: 'Share Tech Mono', monospace; font-size: 10px;
+  letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.15s; text-decoration: none; display: inline-block;
+}
+.btn-ghost:hover { color: var(--orange); border-color: var(--orange); background: rgba(201,106,0,0.1); }
+
+.btn-row { display: flex; gap: 1px; margin-top: 1.5rem; }
+
+/* ── ALERT ────────────────────────────────────────── */
+.alert {
+  padding: 10px 14px; font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  border-left: 2px solid; margin-bottom: 1.25rem; display: none;
+}
+.alert.visible { display: block; }
+.alert-error   { border-color: var(--red2);  color: var(--red2);  background: rgba(139,26,0,0.08); }
+.alert-success { border-color: var(--green); color: var(--green); background: rgba(58,154,96,0.08); }
+.alert-info    { border-color: var(--orange); color: var(--orange); background: rgba(201,106,0,0.08); }
+
+/* ── CHARACTER CARD ───────────────────────────────── */
+.char-card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--orange);
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1px;
+}
+.char-avatar {
+  width: 64px; height: 64px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.char-avatar-inner {
+  font-family: 'Rajdhani', sans-serif; font-weight: 700;
+  font-size: 28px; letter-spacing: 0.05em; color: var(--orange);
+  text-transform: uppercase;
+}
+.char-avatar::after {
+  content: ''; position: absolute;
+  bottom: -4px; right: -4px;
+  width: 10px; height: 10px;
+  border-bottom: 1px solid var(--orange);
+  border-right: 1px solid var(--orange);
+}
+.char-info { display: flex; flex-direction: column; gap: 0.4rem; }
+.char-name {
+  font-family: 'Rajdhani', sans-serif; font-weight: 700;
+  font-size: 22px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--white);
+}
+.char-id { font-size: 10px; letter-spacing: 0.2em; color: var(--text3); text-transform: uppercase; }
+.char-tags { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.char-tag {
+  font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 2px 6px; border: 1px solid var(--line); color: var(--text2);
+}
+.char-tag.active { border-color: var(--green); color: var(--green); }
+.char-tag.beta   { border-color: var(--orange); color: var(--orange); }
+
+/* ── SOON PLACEHOLDER ─────────────────────────────── */
+.soon-panel {
+  background: var(--bg);
+  border: 1px solid var(--line2);
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.soon-tag {
+  font-size: 9px; letter-spacing: 0.25em; color: var(--text3);
+  text-transform: uppercase; border: 1px solid var(--text3); padding: 2px 10px;
+}
+.soon-title {
+  font-family: 'Rajdhani', sans-serif; font-weight: 600;
+  font-size: 20px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text3);
+}
+.soon-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; color: var(--text3); }
+
+/* ── PW STRENGTH ──────────────────────────────────── */
+.pw-strength { margin-top: 0.5rem; height: 2px; background: var(--line2); }
+.pw-strength-bar { height: 100%; transition: width 0.3s, background 0.3s; width: 0%; }
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .page-wrap { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; flex-direction: row; flex-wrap: wrap; padding: 0.5rem; }
+  .sidebar-section { margin: 0; }
+  .sidebar-label { display: none; }
+  .sidebar-link { padding: 0.5rem 1rem; font-size: 9px; }
+  .main { padding: 1.5rem; }
+  .data-row-4 { grid-template-columns: 1fr 1fr; }
+  .data-row-3 { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-corp" href="https://phoenixcluster.xyz">
+    <div class="nav-corp-icon">
+      <svg viewBox="0 0 10 10"><polygon points="5,1 9,3 9,7 5,9 1,7 1,3"/></svg>
+    </div>
+    <div>
+      <div class="nav-corp-name">Project Phoenix</div>
+      <div class="nav-corp-sub">DUST 514 Revival</div>
+    </div>
+  </a>
+  <div class="nav-breadcrumb">// Mercenary <span>Dossier</span></div>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-user-dot"></div>
+      <span id="nav-username">Loading...</span>
+    </div>
+    <button class="nav-signout" onclick="handleSignOut()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">// Account</div>
+      <div class="sidebar-link active" data-section="overview">
+        <svg class="link-icon" viewBox="0 0 12 12" fill="currentColor"><rect x="1" y="1" width="4" height="4"/><rect x="7" y="1" width="4" height="4"/><rect x="1" y="7" width="4" height="4"/><rect x="7" y="7" width="4" height="4"/></svg>
+        Overview
+      </div>
+      <div class="sidebar-link" data-section="security">
+        <svg class="link-icon" viewBox="0 0 12 12" fill="currentColor"><path d="M6 1L1 3v4c0 2.5 2.2 4 5 4s5-1.5 5-4V3L6 1z"/></svg>
+        Security
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">// Mercenary</div>
+      <div class="sidebar-link" data-section="character">
+        <svg class="link-icon" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="4" r="3"/><path d="M1 11c0-2.8 2.2-5 5-5s5 2.2 5 5"/></svg>
+        Character
+      </div>
+      <div class="sidebar-link" data-section="stats">
+        <svg class="link-icon" viewBox="0 0 12 12" fill="currentColor"><rect x="1" y="7" width="2" height="4"/><rect x="5" y="4" width="2" height="7"/><rect x="9" y="1" width="2" height="10"/></svg>
+        Stats
+        <span class="soon-tag">Soon™</span>
+      </div>
+      <div class="sidebar-link" data-section="isk">
+        <svg class="link-icon" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="6" y="9" text-anchor="middle" font-size="6" fill="currentColor">₳</text></svg>
+        ISK History
+        <span class="soon-tag">Soon™</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      SYS // PHX-core<br>
+      AUTH // Active<br>
+      CLUSTER // Beta
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="tab-section active" id="section-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-header-label">// Account Overview</div>
+          <div class="page-header-title" id="ov-username">—</div>
+        </div>
+        <div class="page-header-meta" id="ov-meta">
+          Loading account data...
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-block-header">
+          <div class="section-block-title"><span>// Identity</span>Account Record</div>
+        </div>
+        <div class="data-row data-row-2">
+          <div class="data-block">
+            <div class="data-label">// Username</div>
+            <div class="data-value sm" id="ov-uname-val">—</div>
+            <div class="data-sub">Display &amp; login name</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">// Account ID</div>
+            <div class="data-value sm" id="ov-acct-id">—</div>
+            <div class="data-sub">Internal identifier</div>
+          </div>
+        </div>
+        <div class="data-row data-row-2">
+          <div class="data-block">
+            <div class="data-label">// Auth Backend</div>
+            <div class="data-value sm" id="ov-backend">—</div>
+            <div class="data-sub">Login method</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">// Member Since</div>
+            <div class="data-value sm" id="ov-since">—</div>
+            <div class="data-sub">Account creation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-block-header">
+          <div class="section-block-title"><span>// Session</span>Active Session</div>
+        </div>
+        <div class="data-row data-row-3">
+          <div class="data-block">
+            <div class="data-label">// Status</div>
+            <div class="data-value sm" style="color:var(--green)">Authenticated</div>
+            <div class="data-sub">Session active</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">// Character ID</div>
+            <div class="data-value sm" id="ov-char-id">—</div>
+            <div class="data-sub">Assigned character</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">// Cluster</div>
+            <div class="data-value sm">Phoenix</div>
+            <div class="data-sub">Beta environment</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="tab-section" id="section-security">
+      <div class="page-header">
+        <div>
+          <div class="page-header-label">// Security</div>
+          <div class="page-header-title">Access Control</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-block-header">
+          <div class="section-block-title"><span>// Credentials</span>Change Password</div>
+        </div>
+
+        <div class="alert alert-error" id="pw-error"></div>
+        <div class="alert alert-success" id="pw-success"></div>
+        <div class="alert alert-info" id="pw-info">
+          Password changes apply immediately. The game client and launcher will require re-authentication on next session.
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Current Password</div>
+          <input class="field-input" type="password" id="pw-current" placeholder="••••••••••••" autocomplete="current-password">
+          <div class="field-error" id="pw-current-err"></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">New Password <span style="font-size:9px;color:var(--text3)">min 8 chars</span></div>
+          <input class="field-input" type="password" id="pw-new" placeholder="••••••••••••" autocomplete="new-password">
+          <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
+          <div class="field-error" id="pw-new-err"></div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Confirm New Password</div>
+          <input class="field-input" type="password" id="pw-confirm" placeholder="••••••••••••" autocomplete="new-password">
+          <div class="field-error" id="pw-confirm-err"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-submit" onclick="handlePasswordChange()">Update Password</button>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-block-header">
+          <div class="section-block-title"><span>// Sessions</span>Session Management</div>
+        </div>
+        <div class="data-row">
+          <div class="data-block">
+            <div class="data-label">// Active Sessions</div>
+            <div class="data-value sm" id="session-count">1</div>
+            <div class="data-sub">Current authenticated sessions</div>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button class="btn-ghost" onclick="handleRevokeAll()">Revoke All Other Sessions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER -->
+    <div class="tab-section" id="section-character">
+      <div class="page-header">
+        <div>
+          <div class="page-header-label">// Mercenary</div>
+          <div class="page-header-title">Character Record</div>
+        </div>
+      </div>
+
+      <div class="section-block" id="char-loaded" style="display:none">
+        <div class="section-block-header">
+          <div class="section-block-title"><span>// Identity</span>Clone Data</div>
+        </div>
+        <div class="char-card">
+          <div class="char-avatar">
+            <div class="char-avatar-inner" id="char-initial">?</div>
+          </div>
+          <div class="char-info">
+            <div class="char-name" id="char-name">—</div>
+            <div class="char-id">CHAR // <span id="char-id-val">—</span></div>
+            <div class="char-tags">
+              <div class="char-tag active">Active</div>
+              <div class="char-tag beta">Beta Tester</div>
+              <div class="char-tag" id="char-backend-tag">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="data-row data-row-2" style="margin-top:1px">
+          <div class="data-block">
+            <div class="data-label">// Race</div>
+            <div class="data-value sm" id="char-race">—</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">// Corporation</div>
+            <div class="data-value sm" id="char-corp">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="char-none" class="alert alert-info" style="display:none">
+        No character found. Create your mercenary on first login via the Phoenix Launcher or RPCS3.
+      </div>
+      <div id="char-loading" style="font-size:10px;letter-spacing:0.2em;color:var(--text3);text-transform:uppercase;padding:1rem 0;">
+        Loading character data...
+      </div>
+    </div>
+
+    <!-- STATS (Soon) -->
+    <div class="tab-section" id="section-stats">
+      <div class="page-header">
+        <div>
+          <div class="page-header-label">// Statistics</div>
+          <div class="page-header-title">Combat Record</div>
+        </div>
+      </div>
+      <div class="soon-panel">
+        <div class="soon-tag">Soon™</div>
+        <div class="soon-title">Lifetime Statistics</div>
+        <div class="soon-sub">Kill/death ratios, WP earned, contracts completed, and more. Coming in a future update.</div>
+      </div>
+    </div>
+
+    <!-- ISK (Soon) -->
+    <div class="tab-section" id="section-isk">
+      <div class="page-header">
+        <div>
+          <div class="page-header-label">// Finance</div>
+          <div class="page-header-title">ISK Ledger</div>
+        </div>
+      </div>
+      <div class="soon-panel">
+        <div class="soon-tag">Soon™</div>
+        <div class="soon-title">ISK History</div>
+        <div class="soon-sub">Full transaction history, earnings breakdown, and balance tracking. Coming in a future update.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const SSO_BASE = 'https://sso.phoenixcluster.xyz';
+
+/* ── Auth guard ──────────────────────────────────────────────── */
+function getToken() {
+  return localStorage.getItem('phx_token') || sessionStorage.getItem('phx_token');
+}
+function getUsername() {
+  return localStorage.getItem('phx_username') || sessionStorage.getItem('phx_username') || '—';
+}
+
+if (!getToken()) {
+  window.location.href = '/login';
+}
+
+/* ── Nav username ────────────────────────────────────────────── */
+document.getElementById('nav-username').textContent = getUsername();
+
+/* ── Sidebar navigation ──────────────────────────────────────── */
+document.querySelectorAll('.sidebar-link[data-section]').forEach(link => {
+  link.addEventListener('click', () => {
+    const target = link.dataset.section;
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    link.classList.add('active');
+    document.getElementById('section-' + target).classList.add('active');
+  });
+});
+
+/* ── Load account data ───────────────────────────────────────── */
+async function loadAccount() {
+  const token = getToken();
+  try {
+    const resp = await fetch(`${SSO_BASE}/auth/me`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (resp.status === 401) { handleSignOut(); return; }
+    if (!resp.ok) return;
+    const data = await resp.json();
+
+    /* Overview */
+    const username = data.username || getUsername();
+    document.getElementById('ov-username').textContent = username;
+    document.getElementById('ov-uname-val').textContent = username;
+    document.getElementById('ov-acct-id').textContent   = data.account_id  || '—';
+    document.getElementById('ov-char-id').textContent   = data.character_id || '—';
+    document.getElementById('ov-backend').textContent   = backendLabel(data.backend);
+    document.getElementById('ov-since').textContent     = data.created_at
+      ? new Date(data.created_at * 1000).toLocaleDateString('en-GB', {year:'numeric',month:'short',day:'numeric'})
+      : '—';
+    document.getElementById('ov-meta').innerHTML =
+      `ACCT // ${data.account_id || '—'}<br>CHAR // ${data.character_id || '—'}<br>BACKEND // ${backendLabel(data.backend)}`;
+
+    /* Character section */
+    loadCharacter(data.character_id, data.backend);
+
+  } catch(e) {
+    console.error('Failed to load account:', e);
+  }
+}
+
+function backendLabel(backend) {
+  if (!backend) return '—';
+  return { pc: 'PC (MachoNet)', psn: 'PSN', rpcn: 'RPCN' }[backend] || backend.toUpperCase();
+}
+
+async function loadCharacter(charId, backend) {
+  document.getElementById('char-loading').style.display = 'block';
+  document.getElementById('char-loaded').style.display  = 'none';
+  document.getElementById('char-none').style.display    = 'none';
+
+  if (!charId) {
+    document.getElementById('char-loading').style.display = 'none';
+    document.getElementById('char-none').style.display    = 'block';
+    return;
+  }
+
+  const token = getToken();
+  try {
+    const resp = await fetch(`${SSO_BASE}/auth/character`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!resp.ok) throw new Error();
+    const data = await resp.json();
+
+    const name = data.name || getUsername();
+    document.getElementById('char-initial').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('char-name').textContent    = name;
+    document.getElementById('char-id-val').textContent  = charId;
+    document.getElementById('char-race').textContent    = data.race || '—';
+    document.getElementById('char-corp').textContent    = data.corporation || '—';
+    document.getElementById('char-backend-tag').textContent = backendLabel(backend);
+
+    document.getElementById('char-loading').style.display = 'none';
+    document.getElementById('char-loaded').style.display  = 'block';
+  } catch(e) {
+    document.getElementById('char-loading').style.display = 'none';
+    document.getElementById('char-none').style.display    = 'block';
+  }
+}
+
+/* ── Password change ─────────────────────────────────────────── */
+document.getElementById('pw-new').addEventListener('input', function() {
+  const pw = this.value;
+  const bar = document.getElementById('pw-bar');
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (pw.length >= 12) s++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+  if (/[0-9]/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  bar.style.width      = [0,20,40,60,80,100][s] + '%';
+  bar.style.background = ['','#8B1A00','#C96A00','#E07800','#3A7A50','#3A9A60'][s];
+});
+
+/* Show the info banner */
+document.getElementById('pw-info').classList.add('visible');
+
+async function handlePasswordChange() {
+  clearAlert('pw-error'); clearAlert('pw-success');
+  clearFieldErr('pw-current-err'); clearFieldErr('pw-new-err'); clearFieldErr('pw-confirm-err');
+
+  const current = document.getElementById('pw-current').value;
+  const newPw   = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+
+  let valid = true;
+  if (!current)          { showFieldErr('pw-current-err', 'Required'); valid = false; }
+  if (newPw.length < 8)  { showFieldErr('pw-new-err', 'Minimum 8 characters'); valid = false; }
+  if (newPw !== confirm) { showFieldErr('pw-confirm-err', 'Passwords do not match'); valid = false; }
+  if (!valid) return;
+
+  const token = getToken();
+  try {
+    const resp = await fetch(`${SSO_BASE}/auth/password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ current_password: current, new_password: newPw })
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      showAlert('pw-error', data.error_description || 'Password change failed');
+      return;
+    }
+    showAlert('pw-success', 'Password updated successfully');
+    document.getElementById('pw-current').value = '';
+    document.getElementById('pw-new').value     = '';
+    document.getElementById('pw-confirm').value = '';
+    document.getElementById('pw-bar').style.width = '0%';
+  } catch(e) {
+    showAlert('pw-error', 'Could not reach server');
+  }
+}
+
+/* ── Revoke sessions ─────────────────────────────────────────── */
+async function handleRevokeAll() {
+  if (!confirm('Revoke all other sessions? You will remain signed in here.')) return;
+  const token = getToken();
+  try {
+    await fetch(`${SSO_BASE}/auth/sessions/revoke`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    showAlert('pw-success', 'All other sessions revoked');
+  } catch(e) {}
+}
+
+/* ── Sign out ────────────────────────────────────────────────── */
+async function handleSignOut() {
+  const token = getToken();
+  try {
+    await fetch(`${SSO_BASE}/auth/logout`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+  } catch(e) {}
+  localStorage.removeItem('phx_token');
+  localStorage.removeItem('phx_username');
+  sessionStorage.removeItem('phx_token');
+  sessionStorage.removeItem('phx_username');
+  window.location.href = '/login';
+}
+
+/* ── Helpers ─────────────────────────────────────────────────── */
+function showAlert(id, msg)    { const el=document.getElementById(id); el.textContent=msg; el.classList.add('visible'); }
+function clearAlert(id)        { const el=document.getElementById(id); el.textContent=''; el.classList.remove('visible'); }
+function showFieldErr(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.classList.add('visible'); }
+function clearFieldErr(id)     { const el=document.getElementById(id); el.textContent=''; el.classList.remove('visible'); }
+
+/* ── Init ────────────────────────────────────────────────────── */
+loadAccount();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHX // Identity Access — Project Phoenix</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #05060A;
+  --bg2:       #080A10;
+  --bg3:       #0C0E16;
+  --panel:     #0A0C13;
+  --orange:    #C96A00;
+  --orange2:   #E07800;
+  --orange-dim:#5A3000;
+  --red:       #8B1A00;
+  --red2:      #C0392B;
+  --teal:      #1A4A5A;
+  --teal2:     #0D2A36;
+  --green:     #3A9A60;
+  --line:      rgba(201,106,0,0.18);
+  --line2:     rgba(201,106,0,0.08);
+  --text:      #B8C4CC;
+  --text2:     #6A7A84;
+  --text3:     #2E3A42;
+  --white:     #D8E4EA;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ── NAV ──────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 500;
+  height: 42px;
+  background: rgba(5,6,10,0.96);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: stretch;
+}
+
+.nav-corp {
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-right: 1px solid var(--line);
+  gap: 10px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.nav-corp-icon {
+  width: 18px; height: 18px;
+  border: 1px solid var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.nav-corp-icon svg { width: 10px; height: 10px; fill: var(--orange); }
+.nav-corp-name { font-size: 11px; letter-spacing: 0.2em; color: var(--orange); text-transform: uppercase; }
+.nav-corp-sub  { font-size: 9px;  letter-spacing: 0.15em; color: var(--text2); text-transform: uppercase; }
+
+.nav-breadcrumb {
+  display: flex; align-items: center;
+  padding: 0 1.25rem;
+  font-size: 10px; letter-spacing: 0.2em;
+  color: var(--text3); text-transform: uppercase;
+  gap: 0.75rem;
+}
+.nav-breadcrumb span { color: var(--orange); }
+
+.nav-status {
+  display: flex; align-items: center;
+  padding: 0 1.5rem; gap: 1.5rem;
+  margin-left: auto; border-left: 1px solid var(--line);
+}
+.nav-status-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--text2); text-transform: uppercase;
+}
+.status-dot { width: 5px; height: 5px; border-radius: 50%; }
+.status-dot.on   { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.warn { background: var(--orange); box-shadow: 0 0 4px var(--orange); }
+
+/* ── LAYOUT ───────────────────────────────────────── */
+.page-wrap {
+  flex: 1;
+  padding-top: 42px;
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  min-height: 100vh;
+}
+
+/* ── LEFT PANEL ───────────────────────────────────── */
+.left-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 3rem 2.5rem 3rem 3rem;
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.left-bg {
+  position: absolute; inset: 0;
+  background-image: url('banimg2k.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.06;
+  filter: saturate(0.3);
+}
+
+.left-panel::before {
+  content: '';
+  position: absolute; top: 60px; left: 24px;
+  width: 30px; height: 30px;
+  border-top: 1px solid var(--orange);
+  border-left: 1px solid var(--orange);
+}
+.left-panel::after {
+  content: '';
+  position: absolute; bottom: 24px; right: 24px;
+  width: 30px; height: 30px;
+  border-bottom: 1px solid var(--orange);
+  border-right: 1px solid var(--orange);
+}
+
+.left-bootlog {
+  font-size: 10px; letter-spacing: 0.1em;
+  color: var(--text3); margin-bottom: 3rem; line-height: 2;
+  position: relative; z-index: 2;
+}
+.bootlog-line { display: flex; gap: 1rem; }
+.bootlog-ok   { color: #2A6A40; }
+.bootlog-warn { color: var(--orange-dim); }
+
+.left-ident { position: relative; z-index: 2; margin-bottom: 2rem; }
+
+.left-label {
+  font-size: 9px; letter-spacing: 0.3em; color: var(--text2);
+  text-transform: uppercase; margin-bottom: 0.75rem;
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.left-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--line); }
+
+.left-proj {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.5em;
+  color: var(--orange); text-transform: uppercase; margin-bottom: 0.2rem;
+}
+
+.left-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; font-size: clamp(52px, 6vw, 80px);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--white); line-height: 0.9; margin-bottom: 0.3rem;
+}
+
+.left-sub-tag {
+  font-size: 11px; letter-spacing: 0.3em;
+  color: var(--text2); text-transform: uppercase;
+}
+.left-sub-tag span { color: var(--red); }
+
+.left-body {
+  position: relative; z-index: 2;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; color: var(--text2);
+  line-height: 1.6; max-width: 480px; margin-bottom: 2rem;
+  letter-spacing: 0.02em;
+}
+
+.left-facts {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.left-fact {
+  display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 1rem;
+  border-left: 2px solid var(--line2);
+  transition: border-color 0.15s;
+}
+.left-fact:hover { border-left-color: var(--orange); }
+.fact-key {
+  font-size: 9px; letter-spacing: 0.2em; color: var(--text3);
+  text-transform: uppercase; flex-shrink: 0; width: 80px; padding-top: 2px;
+}
+.fact-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; color: var(--text); letter-spacing: 0.03em;
+}
+
+/* ── RIGHT PANEL (FORM AREA) ──────────────────────── */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  background: rgba(8,10,16,0.7);
+}
+
+/* ── TAB SWITCHER ─────────────────────────────────── */
+.form-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.form-tab {
+  flex: 1;
+  padding: 0 1.5rem;
+  height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text2);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  border-right: 1px solid var(--line2);
+  user-select: none;
+}
+.form-tab:last-child { border-right: none; }
+.form-tab:hover { color: var(--orange); background: rgba(201,106,0,0.04); }
+.form-tab.active {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+  background: rgba(201,106,0,0.06);
+}
+
+/* ── FORM PANELS ──────────────────────────────────── */
+.form-panels {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-panel {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  padding: 2.5rem 2rem;
+  gap: 0;
+}
+.form-panel.active { display: flex; }
+
+.form-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line2);
+}
+.form-header-label {
+  font-size: 9px; letter-spacing: 0.3em; color: var(--text2);
+  text-transform: uppercase; margin-bottom: 0.4rem;
+}
+.form-header-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700; font-size: 26px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--white);
+}
+.form-header-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; color: var(--text2); margin-top: 0.4rem;
+  letter-spacing: 0.03em;
+}
+
+/* ── FORM FIELDS ──────────────────────────────────── */
+.field-group { margin-bottom: 1.25rem; }
+
+.field-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text2); margin-bottom: 0.5rem;
+}
+.field-label-hint { color: var(--text3); font-size: 9px; }
+
+.field-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--orange-dim);
+  color: var(--white);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  appearance: none;
+}
+.field-input:focus {
+  border-color: var(--orange);
+  border-left-color: var(--orange);
+  background: var(--bg2);
+}
+.field-input::placeholder { color: var(--text3); }
+.field-input.error { border-color: var(--red2); border-left-color: var(--red2); }
+
+.field-error {
+  font-size: 9px; letter-spacing: 0.15em; color: var(--red2);
+  text-transform: uppercase; margin-top: 0.4rem;
+  display: none;
+}
+.field-error.visible { display: block; }
+
+/* ── CHECKBOX ROW ─────────────────────────────────── */
+.checkbox-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+.checkbox-row input[type=checkbox] { display: none; }
+.checkbox-box {
+  width: 14px; height: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  flex-shrink: 0;
+  position: relative;
+  transition: border-color 0.15s;
+}
+.checkbox-row:hover .checkbox-box { border-color: var(--orange); }
+.checkbox-row input:checked ~ .checkbox-box {
+  border-color: var(--orange);
+  background: rgba(201,106,0,0.15);
+}
+.checkbox-row input:checked ~ .checkbox-box::after {
+  content: '';
+  position: absolute; inset: 3px;
+  background: var(--orange);
+}
+.checkbox-label {
+  font-size: 10px; letter-spacing: 0.15em;
+  color: var(--text2); text-transform: uppercase;
+}
+
+/* ── SUBMIT BTN ───────────────────────────────────── */
+.btn-submit {
+  width: 100%;
+  background: var(--orange);
+  color: #000;
+  border: none;
+  padding: 12px 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 0.3em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-submit:hover { background: var(--orange2); }
+.btn-submit:disabled { background: var(--orange-dim); cursor: not-allowed; }
+.btn-submit-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* ── ALERT BANNERS ────────────────────────────────── */
+.alert {
+  padding: 10px 14px;
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  border-left: 2px solid;
+  margin-bottom: 1.25rem;
+  display: none;
+}
+.alert.visible { display: block; }
+.alert-error   { border-color: var(--red2); color: var(--red2); background: rgba(139,26,0,0.08); }
+.alert-success { border-color: var(--green); color: var(--green); background: rgba(58,154,96,0.08); }
+
+/* ── DIVIDER ──────────────────────────────────────── */
+.form-divider {
+  display: flex; align-items: center; gap: 1rem;
+  margin: 1.5rem 0;
+  font-size: 9px; letter-spacing: 0.2em;
+  color: var(--text3); text-transform: uppercase;
+}
+.form-divider::before,
+.form-divider::after { content: ''; flex: 1; height: 1px; background: var(--line2); }
+
+/* ── LAUNCHER OAUTH BLOCK ─────────────────────────── */
+.launcher-note {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line2);
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--text3); text-transform: uppercase;
+  line-height: 2;
+}
+.launcher-note strong { color: var(--orange); }
+
+/* ── PASSWORD STRENGTH ────────────────────────────── */
+.pw-strength {
+  margin-top: 0.5rem;
+  height: 2px;
+  background: var(--line2);
+  position: relative;
+}
+.pw-strength-bar {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  transition: width 0.3s, background 0.3s;
+  width: 0%;
+}
+
+/* ── TERMS ────────────────────────────────────────── */
+.terms-note {
+  font-size: 9px; letter-spacing: 0.1em;
+  color: var(--text3); text-transform: uppercase;
+  margin-top: 1rem; line-height: 1.8;
+}
+.terms-note a { color: var(--text2); text-decoration: none; }
+.terms-note a:hover { color: var(--orange); }
+
+/* ── FOOTER ───────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+  padding: 1rem 3rem;
+}
+.footer-inner {
+  max-width: 100%; display: flex;
+  align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+}
+.footer-id   { font-size: 10px; letter-spacing: 0.2em; color: var(--orange); text-transform: uppercase; }
+.footer-note { font-size: 9px;  letter-spacing: 0.1em; color: var(--text3); text-transform: uppercase; }
+.footer-links { display: flex; gap: 1.5rem; }
+.footer-links a {
+  font-size: 9px; letter-spacing: 0.2em; color: var(--text2);
+  text-decoration: none; text-transform: uppercase; transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--orange); }
+
+/* ── LOADING SPINNER ──────────────────────────────── */
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  display: none;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .page-wrap { grid-template-columns: 1fr; }
+  .left-panel { display: none; }
+  .right-panel { min-height: calc(100vh - 42px); }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-corp" href="https://phoenixcluster.xyz">
+    <div class="nav-corp-icon">
+      <svg viewBox="0 0 10 10"><polygon points="5,1 9,3 9,7 5,9 1,7 1,3"/></svg>
+    </div>
+    <div>
+      <div class="nav-corp-name">Project Phoenix</div>
+      <div class="nav-corp-sub">DUST 514 Revival</div>
+    </div>
+  </a>
+  <div class="nav-breadcrumb">// Identity <span>Access</span></div>
+  <div class="nav-status">
+    <div class="nav-status-item"><div class="status-dot on"></div>Cluster Online</div>
+    <div class="nav-status-item"><div class="status-dot warn"></div>Beta</div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- LEFT: branding / context -->
+  <div class="left-panel">
+    <div class="left-bg"></div>
+    <div class="left-bootlog">
+      <div class="bootlog-line"><span class="bootlog-ok">[  OK  ]</span><span>Initializing clone vats...</span></div>
+      <div class="bootlog-line"><span class="bootlog-ok">[  OK  ]</span><span>Neural link established</span></div>
+      <div class="bootlog-line"><span class="bootlog-ok">[  OK  ]</span><span>Loading battlefield intelligence</span></div>
+      <div class="bootlog-line"><span class="bootlog-warn">[ WARN ]</span><span>Orbital services: limited availability</span></div>
+      <div class="bootlog-line"><span class="bootlog-ok">[  OK  ]</span><span>Identity authority: online</span></div>
+    </div>
+
+    <div class="left-ident">
+      <div class="left-label">Identity Access</div>
+      <div class="left-proj">Project</div>
+      <div class="left-title">PHOENIX</div>
+      <div class="left-sub-tag">DUST<span>514</span> // Clone Registry</div>
+    </div>
+
+    <p class="left-body">
+      Authenticate your clone identity to access the Phoenix cluster. Your record persists across all deployments.
+    </p>
+
+    <div class="left-facts">
+      <div class="left-fact">
+        <div class="fact-key">Endpoint</div>
+        <div class="fact-val">sso.phoenixcluster.xyz</div>
+      </div>
+      <div class="left-fact">
+        <div class="fact-key">Cluster</div>
+        <div class="fact-val">Phoenix — Beta</div>
+      </div>
+      <div class="left-fact">
+        <div class="fact-key">Platform</div>
+        <div class="fact-val">RPCS3 & PS3</div>
+      </div>
+      <div class="left-fact">
+        <div class="fact-key">Auth</div>
+        <div class="fact-val">MachoNet / RPCN Unified</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: form area -->
+  <div class="right-panel">
+
+    <div class="form-tabs">
+      <div class="form-tab active" data-tab="login">// Sign In</div>
+      <div class="form-tab" data-tab="register">// Register</div>
+    </div>
+
+    <div class="form-panels">
+
+      <!-- LOGIN PANEL -->
+      <div class="form-panel active" id="panel-login">
+        <div class="form-header">
+          <div class="form-header-label">// Authentication</div>
+          <div class="form-header-title">Clone Identity</div>
+          <div class="form-header-sub">Sign in to access the Phoenix cluster and manage your mercenary.</div>
+        </div>
+
+        <div class="alert alert-error" id="login-error"></div>
+        <div class="alert alert-success" id="login-success"></div>
+
+        <div class="field-group">
+          <div class="field-label">Username</div>
+          <input class="field-input" type="text" id="login-username" autocomplete="username" placeholder="your_callsign" spellcheck="false">
+          <div class="field-error" id="login-username-err"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">
+            Password
+            <span class="field-label-hint"><a href="#" id="forgot-link" style="color:var(--text3);text-decoration:none;">Forgot?</a></span>
+          </div>
+          <input class="field-input" type="password" id="login-password" autocomplete="current-password" placeholder="••••••••••••">
+          <div class="field-error" id="login-password-err"></div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="remember-me">
+          <div class="checkbox-box"></div>
+          <span class="checkbox-label">Remember me — stay signed in for 7 days</span>
+        </label>
+
+        <button class="btn-submit" id="login-btn" onclick="handleLogin()">
+          <div class="btn-submit-inner">
+            <div class="spinner" id="login-spinner"></div>
+            <span id="login-btn-text">Authenticate</span>
+          </div>
+        </button>
+
+        <div class="launcher-note">
+          <strong>Launcher users:</strong> the launcher handles auth automatically.<br>
+          This page is for web account management only.
+        </div>
+      </div>
+
+      <!-- REGISTER PANEL -->
+      <div class="form-panel" id="panel-register">
+        <div class="form-header">
+          <div class="form-header-label">// Clone Initialization</div>
+          <div class="form-header-title">New Mercenary</div>
+          <div class="form-header-sub">Create a Phoenix account. Your mercenary character will be set up on first login.</div>
+        </div>
+
+        <div class="alert alert-error" id="reg-error"></div>
+        <div class="alert alert-success" id="reg-success"></div>
+
+        <div class="field-group">
+          <div class="field-label">
+            Username
+            <span class="field-label-hint">1–32 chars</span>
+          </div>
+          <input class="field-input" type="text" id="reg-username" autocomplete="username" placeholder="your_callsign" spellcheck="false" maxlength="32">
+          <div class="field-error" id="reg-username-err"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">
+            Password
+            <span class="field-label-hint">min 8 chars</span>
+          </div>
+          <input class="field-input" type="password" id="reg-password" autocomplete="new-password" placeholder="••••••••••••">
+          <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
+          <div class="field-error" id="reg-password-err"></div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Confirm Password</div>
+          <input class="field-input" type="password" id="reg-confirm" autocomplete="new-password" placeholder="••••••••••••">
+          <div class="field-error" id="reg-confirm-err"></div>
+        </div>
+
+        <button class="btn-submit" id="reg-btn" onclick="handleRegister()">
+          <div class="btn-submit-inner">
+            <div class="spinner" id="reg-spinner"></div>
+            <span id="reg-btn-text">Initialize Clone</span>
+          </div>
+        </button>
+
+        <div class="terms-note">
+          By registering you agree to the <a href="#">Project Phoenix community guidelines</a>.
+          This is a fan project — not affiliated with Fenris Creations.
+        </div>
+      </div>
+
+    </div><!-- /form-panels -->
+  </div><!-- /right-panel -->
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-id">PHX // Identity Access</div>
+    <div class="footer-note">Fan project — not affiliated with or endorsed by Fenris Creations (formerly CCP Games)</div>
+    <div class="footer-links">
+      <a href="https://phoenixcluster.xyz">Home</a>
+      <a href="https://discord.gg/98EdSWyWmA" target="_blank">Discord</a>
+      <a href="https://phoenixcluster.xyz#community">Community</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SSO_BASE = 'https://sso.phoenixcluster.xyz';
+
+/* ── Tab switching ───────────────────────────────────────────── */
+document.querySelectorAll('.form-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + target).classList.add('active');
+  });
+});
+
+/* ── Password strength ───────────────────────────────────────── */
+document.getElementById('reg-password').addEventListener('input', function() {
+  const pw = this.value;
+  const bar = document.getElementById('pw-bar');
+  let strength = 0;
+  if (pw.length >= 8)  strength++;
+  if (pw.length >= 12) strength++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) strength++;
+  if (/[0-9]/.test(pw)) strength++;
+  if (/[^A-Za-z0-9]/.test(pw)) strength++;
+  const pct   = [0, 20, 40, 60, 80, 100][strength];
+  const color = ['','#8B1A00','#C96A00','#E07800','#3A7A50','#3A9A60'][strength];
+  bar.style.width = pct + '%';
+  bar.style.background = color;
+});
+
+/* ── Helpers ─────────────────────────────────────────────────── */
+function setLoading(btnId, spinnerId, textId, loading, label) {
+  const btn = document.getElementById(btnId);
+  const spinner = document.getElementById(spinnerId);
+  const text = document.getElementById(textId);
+  btn.disabled = loading;
+  spinner.style.display = loading ? 'block' : 'none';
+  text.textContent = loading ? 'Processing...' : label;
+}
+
+function showAlert(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  el.textContent = '';
+  el.classList.remove('visible');
+}
+function showFieldErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('visible');
+}
+function clearFieldErr(id) {
+  const el = document.getElementById(id);
+  el.textContent = '';
+  el.classList.remove('visible');
+}
+
+/* ── Login ───────────────────────────────────────────────────── */
+async function handleLogin() {
+  clearAlert('login-error');
+  clearAlert('login-success');
+  clearFieldErr('login-username-err');
+  clearFieldErr('login-password-err');
+
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const remember = document.getElementById('remember-me').checked;
+
+  if (!username) { showFieldErr('login-username-err', 'Username required'); return; }
+  if (!password) { showFieldErr('login-password-err', 'Password required'); return; }
+
+  setLoading('login-btn', 'login-spinner', 'login-btn-text', true, 'Authenticate');
+
+  try {
+    const resp = await fetch(`${SSO_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, remember_me: remember }),
+      credentials: 'include'
+    });
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      showAlert('login-error', data.error_description || data.error || 'Authentication failed');
+      return;
+    }
+
+    /* Store token for web session */
+    if (remember) {
+      localStorage.setItem('phx_token', data.access_token);
+      localStorage.setItem('phx_username', data.username);
+    } else {
+      sessionStorage.setItem('phx_token', data.access_token);
+      sessionStorage.setItem('phx_username', data.username);
+    }
+
+    showAlert('login-success', 'Authentication successful — redirecting...');
+    setTimeout(() => { window.location.href = '/account'; }, 1000);
+
+  } catch(e) {
+    showAlert('login-error', 'Could not reach authentication server');
+  } finally {
+    setLoading('login-btn', 'login-spinner', 'login-btn-text', false, 'Authenticate');
+  }
+}
+
+/* ── Register ────────────────────────────────────────────────── */
+async function handleRegister() {
+  clearAlert('reg-error');
+  clearAlert('reg-success');
+  clearFieldErr('reg-username-err');
+  clearFieldErr('reg-password-err');
+  clearFieldErr('reg-confirm-err');
+
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+
+  let valid = true;
+  if (!username || username.length < 1) {
+    showFieldErr('reg-username-err', 'Username required'); valid = false;
+  } else if (username.length > 32) {
+    showFieldErr('reg-username-err', 'Max 32 characters'); valid = false;
+  } else if (!/^[\x20-\x7E]+$/.test(username)) {
+    showFieldErr('reg-username-err', 'ASCII characters only'); valid = false;
+  }
+  if (!password || password.length < 8) {
+    showFieldErr('reg-password-err', 'Minimum 8 characters'); valid = false;
+  }
+  if (password !== confirm) {
+    showFieldErr('reg-confirm-err', 'Passwords do not match'); valid = false;
+  }
+  if (!valid) return;
+
+  setLoading('reg-btn', 'reg-spinner', 'reg-btn-text', true, 'Initialize Clone');
+
+  try {
+    const resp = await fetch(`${SSO_BASE}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'
+    });
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      if (resp.status === 409) {
+        showFieldErr('reg-username-err', 'Username already taken');
+      } else {
+        showAlert('reg-error', data.error_description || data.error || 'Registration failed');
+      }
+      return;
+    }
+
+    showAlert('reg-success', 'Clone initialized — you can now sign in');
+    /* Switch to login tab after short delay */
+    setTimeout(() => {
+      document.querySelector('[data-tab="login"]').click();
+      document.getElementById('login-username').value = username;
+    }, 1500);
+
+  } catch(e) {
+    showAlert('reg-error', 'Could not reach registration server');
+  } finally {
+    setLoading('reg-btn', 'reg-spinner', 'reg-btn-text', false, 'Initialize Clone');
+  }
+}
+
+/* ── Enter key support ───────────────────────────────────────── */
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+document.getElementById('reg-confirm').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleRegister();
+});
+
+/* ── Check for OAuth redirect params (launcher flow) ─────────── */
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const clientId    = params.get('client_id');
+  const redirectUri = params.get('redirect_uri');
+  if (clientId && redirectUri) {
+    sessionStorage.setItem('phx_oauth_client_id', clientId);
+    sessionStorage.setItem('phx_oauth_redirect', redirectUri);
+    /* Show a note that this is a launcher auth session */
+    const note = document.querySelector('.launcher-note');
+    if (note) {
+      note.innerHTML = '<strong>Launcher auth:</strong> sign in to authorize the Phoenix Launcher. You will be redirected automatically.';
+      note.style.color = 'var(--orange)';
+    }
+  }
+})();
+
+/* ── Redirect after login if OAuth flow ─────────────────────── */
+/* This patches handleLogin to check for saved OAuth params       */
+const _origHandleLogin = handleLogin;
+window.handleLogin = async function() {
+  /* We let the original run; if it sets phx_token, we check redirect */
+  await _origHandleLogin();
+  const redirectUri = sessionStorage.getItem('phx_oauth_redirect');
+  const token = sessionStorage.getItem('phx_token') || localStorage.getItem('phx_token');
+  if (redirectUri && token) {
+    const username = sessionStorage.getItem('phx_username') || localStorage.getItem('phx_username') || '';
+    const url = new URL(redirectUri);
+    url.searchParams.set('token', token);
+    url.searchParams.set('username', username);
+    sessionStorage.removeItem('phx_oauth_redirect');
+    sessionStorage.removeItem('phx_oauth_client_id');
+    window.location.href = url.toString();
+  }
+};
+</script>
+
+</body>
+</html>
